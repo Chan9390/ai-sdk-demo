@@ -46,12 +46,22 @@ export async function POST(req: Request) {
     const result = (await agent.invoke({ messages })) as {
       messages: BaseMessageLike[];
     };
+
+    // Sending `result` will send the complete response from agent including:
+    // - tool calls and params (it only discloses the tools that were used)
+    // - tool call content
+    // - the model in use
+
+    // return Response.json(result);
+
+    // Hence, its always better to send the final message to the client.
     const finalMessage = result.messages.at(-1);
 
     if (finalMessage) {
       return Response.json(finalMessage);
     }
 
+    // Worst case, if there's no final message, send the complete response.
     return Response.json(result);
   } catch (error) {
     console.error("Error in non-streaming langchain endpoint:", error);
