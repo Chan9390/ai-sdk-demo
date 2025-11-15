@@ -31,6 +31,8 @@ export async function POST(req: Request) {
     const model = new ChatOpenAI({
       model: "gpt-5",
       apiKey,
+      // Explicitly disabling the usage of Responses API
+      useResponsesApi: false,
       modelKwargs: {
         reasoning_effort: "minimal",
       },
