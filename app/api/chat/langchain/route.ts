@@ -33,9 +33,9 @@ export async function POST(req: Request) {
       apiKey,
       // Explicitly disabling the usage of Responses API
       useResponsesApi: false,
-      modelKwargs: {
-        reasoning_effort: "minimal",
-      },
+      reasoning: {
+        "effort": "minimal",
+      }
     });
 
     // Create the agent with LangChain helper so it can auto-run tools

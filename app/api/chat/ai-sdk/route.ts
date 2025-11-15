@@ -42,6 +42,11 @@ export async function POST(req: Request) {
     // Does not work for agent.respond() - requires UIMessages
     const result = await agent.generate({
       messages,
+      providerOptions: {
+        openai: {
+          reasoningEffort: 'minimal',
+        },
+      },
     });
 
     // Return only the last message
