@@ -1,5 +1,5 @@
 import { ChatOpenAI } from "@langchain/openai";
-import { allTools } from "@/lib/chat/tools";
+import { allTools } from "@/lib/tools/langchain";
 
 export const maxDuration = 30;
 
@@ -25,9 +25,8 @@ export async function POST(req: Request) {
 
     // Initialize ChatOpenAI with gpt-5 and bind tools
     const model = new ChatOpenAI({
-      model: "gpt-5-mini",
+      model: "gpt-5",
       apiKey,
-      temperature: undefined, // Not supported on gpt-5
       modelKwargs: {
         reasoning_effort: "minimal",
       },
@@ -36,12 +35,7 @@ export async function POST(req: Request) {
     // Invoke the model and wait for complete response
     const response = await model.invoke(messages);
 
-    // Return the complete response
-    return Response.json({
-      role: "assistant",
-      content: response.content,
-      tool_calls: response.tool_calls || [],
-    });
+    return Response.json(response);
   } catch (error) {
     console.error("Error in non-streaming langchain endpoint:", error);
     return Response.json(
