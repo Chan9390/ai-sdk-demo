@@ -28,7 +28,7 @@ export default function BasicChatPage() {
       <div className="border-b p-4">
         <h1 className="font-semibold text-xl">Basic Chat</h1>
         <p className="text-muted-foreground text-sm">
-          Simple non-streaming chat with langchain endpoint
+          Simple chat with AI SDK agent endpoint
         </p>
       </div>
 
