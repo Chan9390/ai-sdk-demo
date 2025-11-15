@@ -1,11 +1,15 @@
+import { BaseMessageLike } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
+import { createAgent } from "langchain";
 import { allTools } from "@/lib/tools/langchain";
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const { messages } = (await req.json()) as {
+      messages?: BaseMessageLike[];
+    };
 
     if (!messages || !Array.isArray(messages)) {
       return Response.json(
@@ -23,19 +27,32 @@ export async function POST(req: Request) {
       );
     }
 
-    // Initialize ChatOpenAI with gpt-5 and bind tools
+    // Initialize ChatOpenAI with gpt-5
     const model = new ChatOpenAI({
       model: "gpt-5",
       apiKey,
       modelKwargs: {
         reasoning_effort: "minimal",
       },
-    }).bindTools(allTools);
+    });
 
-    // Invoke the model and wait for complete response
-    const response = await model.invoke(messages);
+    // Create the agent with LangChain helper so it can auto-run tools
+    const agent = createAgent({
+      model,
+      tools: allTools,
+    });
 
-    return Response.json(response);
+    // Invoke the agent so it can call tools and respond with the final message
+    const result = (await agent.invoke({ messages })) as {
+      messages: BaseMessageLike[];
+    };
+    const finalMessage = result.messages.at(-1);
+
+    if (finalMessage) {
+      return Response.json(finalMessage);
+    }
+
+    return Response.json(result);
   } catch (error) {
     console.error("Error in non-streaming langchain endpoint:", error);
     return Response.json(
