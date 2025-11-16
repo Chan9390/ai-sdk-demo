@@ -67,103 +67,95 @@ export default function MessagePage() {
 
   return (
     // This h-screen will make the parent div take full screen height
-    <div className="flex flex-col h-screen">
-      {/* This child div uses flex-1 to use all space and push the text area to the bottom of flex.
-       *  Without this, input textbox will keep moving in the screen
-       */}
-      <div className="flex-1 overflow-auto">
-        <Conversation>
-          <ConversationContent>
-            {messages.map((message, messageIndex) => (
-              <Fragment key={message.id}>
-                {message.parts.map((part, i) => {
-                  // Handle all tool parts dynamically
-                  // As we are not hardcoding the tool names, we can't add this to switch case
-                  if (part.type.startsWith("tool-")) {
-                    const toolPart = part as ToolUIPart;
-                    return (
-                      <Tool key={`${message.id}-${i}`} defaultOpen={false}>
-                        <ToolHeader
-                          state={toolPart.state}
-                          type={toolPart.type}
-                        />
-                        <ToolContent>
-                          <ToolInput input={toolPart.input} />
-                          <ToolOutput
-                            output={
-                              <MessageResponse>
-                                {typeof toolPart.output === "string"
-                                  ? toolPart.output
-                                  : JSON.stringify(toolPart.output, null, 2)}
-                              </MessageResponse>
-                            }
-                            errorText={toolPart.errorText}
-                          />
-                        </ToolContent>
-                      </Tool>
-                    );
-                  }
-
-                  switch (part.type) {
-                    case "text":
-                      const isLastMessage =
-                        messageIndex === messages.length - 1;
-
-                      return (
-                        <Fragment key={`${message.id}-${i}`}>
-                          <Message from={message.role}>
-                            <MessageContent>
-                              <MessageResponse>{part.text}</MessageResponse>
-                            </MessageContent>
-                          </Message>
-                          {message.role === "assistant" && isLastMessage && (
-                            <MessageActions>
-                              <MessageAction
-                                onClick={() => regenerate()}
-                                label="Retry"
-                              >
-                                <RefreshCcwIcon className="size-3" />
-                              </MessageAction>
-                              <MessageAction
-                                onClick={() =>
-                                  navigator.clipboard.writeText(part.text)
-                                }
-                                label="Copy"
-                              >
-                                <CopyIcon className="size-3" />
-                              </MessageAction>
-                            </MessageActions>
-                          )}
-                        </Fragment>
-                      );
-
-                    case "reasoning":
-                      return (
-                        <Reasoning
-                          key={`${message.id}-${i}`}
-                          className="w-full"
-                          isStreaming={
-                            status === "streaming" &&
-                            i === message.parts.length - 1 &&
-                            message.id === messages.at(-1)?.id
+    <div className="relative flex h-screen size-full flex-col divide-y overflow-hidden">
+      <Conversation>
+        <ConversationContent>
+          {messages.map((message, messageIndex) => (
+            <Fragment key={message.id}>
+              {message.parts.map((part, i) => {
+                // Handle all tool parts dynamically
+                // As we are not hardcoding the tool names, we can't add this to switch case
+                if (part.type.startsWith("tool-")) {
+                  const toolPart = part as ToolUIPart;
+                  return (
+                    <Tool key={`${message.id}-${i}`} defaultOpen={false}>
+                      <ToolHeader state={toolPart.state} type={toolPart.type} />
+                      <ToolContent>
+                        <ToolInput input={toolPart.input} />
+                        <ToolOutput
+                          output={
+                            <MessageResponse>
+                              {typeof toolPart.output === "string"
+                                ? toolPart.output
+                                : JSON.stringify(toolPart.output, null, 2)}
+                            </MessageResponse>
                           }
-                        >
-                          <ReasoningTrigger />
-                          <ReasoningContent>{part.text}</ReasoningContent>
-                        </Reasoning>
-                      );
-                    default:
-                      return null;
-                  }
-                })}
-              </Fragment>
-            ))}
-          </ConversationContent>
-          <ConversationScrollButton />
-        </Conversation>
-      </div>
+                          errorText={toolPart.errorText}
+                        />
+                      </ToolContent>
+                    </Tool>
+                  );
+                }
 
-      {/* The following is just the basic way of sending input to useChat
+                switch (part.type) {
+                  case "text":
+                    const isLastMessage = messageIndex === messages.length - 1;
+
+                    return (
+                      <Fragment key={`${message.id}-${i}`}>
+                        <Message from={message.role}>
+                          <MessageContent>
+                            <MessageResponse>{part.text}</MessageResponse>
+                          </MessageContent>
+                        </Message>
+                        {message.role === "assistant" && isLastMessage && (
+                          <MessageActions>
+                            <MessageAction
+                              onClick={() => regenerate()}
+                              label="Retry"
+                            >
+                              <RefreshCcwIcon className="size-3" />
+                            </MessageAction>
+                            <MessageAction
+                              onClick={() =>
+                                navigator.clipboard.writeText(part.text)
+                              }
+                              label="Copy"
+                            >
+                              <CopyIcon className="size-3" />
+                            </MessageAction>
+                          </MessageActions>
+                        )}
+                      </Fragment>
+                    );
+
+                  case "reasoning":
+                    return (
+                      <Reasoning
+                        key={`${message.id}-${i}`}
+                        className="w-full"
+                        isStreaming={
+                          status === "streaming" &&
+                          i === message.parts.length - 1 &&
+                          message.id === messages.at(-1)?.id
+                        }
+                      >
+                        <ReasoningTrigger />
+                        <ReasoningContent>{part.text}</ReasoningContent>
+                      </Reasoning>
+                    );
+                  default:
+                    return null;
+                }
+              })}
+            </Fragment>
+          ))}
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
+
+      <div className="grid shrink-0 gap-4 pt-4">
+        {/* The following is just the basic way of sending input to useChat
 
       <form
         onSubmit={(e) => {
@@ -179,19 +171,19 @@ export default function MessagePage() {
         />
       </form> */}
 
-      <div className="p-4 border-t">
-        <PromptInputProvider>
-          <PromptInput onSubmit={handleSubmit}>
-            <PromptInputBody>
-              <PromptInputTextarea
-                onChange={(e) => setInput(e.target.value)}
-                ref={textareaRef}
-                value={input}
-              />
-            </PromptInputBody>
-            <PromptInputFooter>
-              {/* Keeping the footer empty for now */}
-              {/* <PromptInputTools>
+        <div className="w-full px-4 pb-4">
+          <PromptInputProvider>
+            <PromptInput onSubmit={handleSubmit}>
+              <PromptInputBody>
+                <PromptInputTextarea
+                  onChange={(e) => setInput(e.target.value)}
+                  ref={textareaRef}
+                  value={input}
+                />
+              </PromptInputBody>
+              <PromptInputFooter>
+                {/* Keeping the footer empty for now */}
+                {/* <PromptInputTools>
               <PromptInputActionMenu>
                 <PromptInputActionMenuTrigger />
                 <PromptInputActionMenuContent>
@@ -199,14 +191,15 @@ export default function MessagePage() {
                 </PromptInputActionMenuContent>
               </PromptInputActionMenu>
             </PromptInputTools> */}
-              <PromptInputSubmit
-                className="ml-auto"
-                status={status}
-                disabled={!input.trim()}
-              />
-            </PromptInputFooter>
-          </PromptInput>
-        </PromptInputProvider>
+                <PromptInputSubmit
+                  className="ml-auto"
+                  status={status}
+                  disabled={!input.trim()}
+                />
+              </PromptInputFooter>
+            </PromptInput>
+          </PromptInputProvider>
+        </div>
       </div>
     </div>
   );
