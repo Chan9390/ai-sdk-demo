@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       providerOptions: {
         // web_search doesn't work if reasoning effort is set to minimal. Hence low.
         openai: {
-          reasoningEffort: 'low',
+          reasoningEffort: "low",
         },
       },
     });
@@ -66,9 +66,6 @@ export async function POST(req: Request) {
     return Response.json(result);
   } catch (error) {
     console.error("Error in AI SDK endpoint:", error);
-    return Response.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }

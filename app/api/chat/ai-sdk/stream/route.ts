@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       messages,
       providerOptions: {
         openai: {
-          reasoningEffort: 'minimal',
+          reasoningEffort: "minimal",
         },
       },
     });
@@ -70,14 +70,11 @@ export async function POST(req: Request) {
       headers: {
         "Content-Type": "application/json",
         "Cache-Control": "no-cache",
-        "Connection": "keep-alive",
+        Connection: "keep-alive",
       },
     });
   } catch (error) {
     console.error("Error in AI SDK streaming endpoint:", error);
-    return Response.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -42,9 +42,6 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("Error in AI SDK agent streaming endpoint:", error);
-    return Response.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }

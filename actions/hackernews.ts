@@ -1,6 +1,8 @@
 import { HNStory, HackerNewsResult } from "@/types/hackernews";
 
-export async function fetchHackerNews(limit: number = 10): Promise<HackerNewsResult> {
+export async function fetchHackerNews(
+  limit: number = 10
+): Promise<HackerNewsResult> {
   try {
     const safeLimit = Math.min(Math.max(limit, 1), 30);
 

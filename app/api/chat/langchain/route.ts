@@ -34,8 +34,8 @@ export async function POST(req: Request) {
       // Explicitly disabling the usage of Responses API
       useResponsesApi: false,
       reasoning: {
-        "effort": "minimal",
-      }
+        effort: "minimal",
+      },
     });
 
     // Create the agent with LangChain helper so it can auto-run tools
@@ -67,9 +67,6 @@ export async function POST(req: Request) {
     return Response.json(result);
   } catch (error) {
     console.error("Error in non-streaming langchain endpoint:", error);
-    return Response.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }

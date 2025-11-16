@@ -19,8 +19,8 @@ function resolveDuckDuckGoRedirect(rawHref: string): string {
   const normalizedHref = rawHref.startsWith("//")
     ? `https:${rawHref}`
     : rawHref.startsWith("/")
-    ? `https://lite.duckduckgo.com${rawHref}`
-    : rawHref;
+      ? `https://lite.duckduckgo.com${rawHref}`
+      : rawHref;
 
   try {
     const url = new URL(normalizedHref);

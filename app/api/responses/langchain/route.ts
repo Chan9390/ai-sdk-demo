@@ -36,13 +36,11 @@ export async function POST(req: Request) {
       // web_search doesn't work if reasoning effort is set to minimal. Hence low.
       reasoning: {
         effort: "low",
-      }
+      },
     });
 
     // Bind model with built-in web search tool
-    const modelWithWebSearch = model.bindTools([
-      { type: "web_search" },
-    ]);
+    const modelWithWebSearch = model.bindTools([{ type: "web_search" }]);
 
     // Create the agent with LangChain helper so it can auto-run tools
     const agent = createAgent({
@@ -73,9 +71,6 @@ export async function POST(req: Request) {
     return Response.json(result);
   } catch (error) {
     console.error("Error in non-streaming langchain endpoint:", error);
-    return Response.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }
