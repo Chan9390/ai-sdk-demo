@@ -1,8 +1,17 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, type ToolUIPart } from "ai";
+import { DefaultChatTransport, type ToolUIPart, type UIMessage } from "ai";
 import { useRef, useState } from "react";
+
+// Define custom message type with suggestions data
+type ChatMessage = UIMessage<
+  never,
+  {
+    suggestions: string[];
+  }
+>;
+
 import {
   Message,
   MessageContent,
@@ -13,28 +22,16 @@ import {
 import {
   Conversation,
   ConversationContent,
-  ConversationEmptyState,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
 import {
   PromptInput,
-  PromptInputActionAddAttachments,
-  PromptInputActionMenu,
-  PromptInputActionMenuContent,
-  PromptInputActionMenuTrigger,
-  PromptInputAttachment,
-  PromptInputAttachments,
   PromptInputBody,
-  PromptInputButton,
   PromptInputFooter,
-  PromptInputHeader,
   type PromptInputMessage,
   PromptInputProvider,
-  PromptInputSpeechButton,
   PromptInputSubmit,
   PromptInputTextarea,
-  PromptInputTools,
-  usePromptInputController,
 } from "@/components/ai-elements/prompt-input";
 import {
   Reasoning,
@@ -48,18 +45,24 @@ import {
   ToolInput,
   ToolOutput,
 } from "@/components/ai-elements/tool";
+import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 
 import { Fragment } from "react";
 import { RefreshCcwIcon, CopyIcon } from "lucide-react";
 
 export default function MessagePage() {
-  const { messages, sendMessage, status, regenerate } = useChat({
+  const { messages, sendMessage, status, regenerate } = useChat<ChatMessage>({
     transport: new DefaultChatTransport({
-      api: "/api/agent/ai-sdk/responses",
+      api: "/api/agent/ai-sdk/suggestions",
     }),
   });
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Extract latest suggestions from the most recent message
+  const latestSuggestions = messages[messages.length - 1]?.parts.find(
+    (part) => part.type === "data-suggestions"
+  )?.data;
 
   const handleSubmit = (message: PromptInputMessage) => {
     sendMessage({ text: message.text });
@@ -109,22 +112,38 @@ export default function MessagePage() {
                           </MessageContent>
                         </Message>
                         {message.role === "assistant" && isLastMessage && (
-                          <MessageActions>
-                            <MessageAction
-                              onClick={() => regenerate()}
-                              label="Retry"
-                            >
-                              <RefreshCcwIcon className="size-3" />
-                            </MessageAction>
-                            <MessageAction
-                              onClick={() =>
-                                navigator.clipboard.writeText(part.text)
-                              }
-                              label="Copy"
-                            >
-                              <CopyIcon className="size-3" />
-                            </MessageAction>
-                          </MessageActions>
+                          <>
+                            <MessageActions>
+                              <MessageAction
+                                onClick={() => regenerate()}
+                                label="Retry"
+                              >
+                                <RefreshCcwIcon className="size-3" />
+                              </MessageAction>
+                              <MessageAction
+                                onClick={() =>
+                                  navigator.clipboard.writeText(part.text)
+                                }
+                                label="Copy"
+                              >
+                                <CopyIcon className="size-3" />
+                              </MessageAction>
+                            </MessageActions>
+
+                            {/* Render suggestions if available */}
+                            {latestSuggestions &&
+                              latestSuggestions.length > 0 && (
+                                <Suggestions>
+                                  {latestSuggestions.map((suggestion, sIdx) => (
+                                    <Suggestion
+                                      key={sIdx}
+                                      suggestion={suggestion}
+                                      onClick={(s) => sendMessage({ text: s })}
+                                    />
+                                  ))}
+                                </Suggestions>
+                              )}
+                          </>
                         )}
                       </Fragment>
                     );
